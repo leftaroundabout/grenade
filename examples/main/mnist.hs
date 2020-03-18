@@ -15,6 +15,7 @@ import           Codec.Compression.GZip ( decompress )
 import           Data.Serialize ( Get )
 import qualified Data.Serialize as Serialize
 import qualified Data.ByteString.Lazy as B
+import qualified Data.ByteString as BS
 
 import           Data.List ( foldl' )
 import           Data.List.Split ( chunksOf )
@@ -112,8 +113,11 @@ convTest iterations dataDir nSamples rate = do
   trainEach rate' !network (i, o) = train rate' network i o
 
   runIteration trainRows validateRows net i = do
-    let trained' = foldl' (trainEach ( rate { learningRate = learningRate rate * 0.9 ^ i} )) net trainRows
-    print trained'
+    let trained = foldl' (trainEach ( rate { learningRate = learningRate rate * 0.9 ^ i} )) net trainRows
+    let storeFileName = "MNISTclassifier-bestmodel"
+    print trained
+    BS.writeFile storeFileName $ Serialize.encode trained
+    Right trained' <- Serialize.decodeLazy <$> B.readFile storeFileName
 
     putStrLn "Checking..."
     let res      = fmap (\(rowP,rowL) -> (rowL,) $ runNet trained' rowP) validateRows
