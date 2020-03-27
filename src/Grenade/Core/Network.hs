@@ -28,7 +28,7 @@ module Grenade.Core.Network (
   , runGradient
   , applyUpdate
 
-  , randomNetwork
+  , randomNetwork, CreatableNetwork
   ) where
 
 import           Control.Monad.Random ( MonadRandom )
